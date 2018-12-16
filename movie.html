@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Movie Search</title>
+    <!-- Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+   <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+    <style>
+        div {
+    border-spacing: 5px;
+    width: 100%
+}
+body{
+    background-image: url(https://boygeniusreport.files.wordpress.com/2016/03/movies-tiles.jpg?quality=98&strip=all)
+}
+div {
+    border: 1px solid black;
+    padding: 15px;
+}
+
+
+    .white {
+        background-color: white;
+        color: black;
+        text-align: center
+    }
+
+    #movieList {
+        background-color:rgb(80, 115, 179);
+        text-align: center;
+        color: white;
+    }
+
+    .gray {
+        background-color:rgb(143, 153, 188);
+    }
+
+  </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="white">
+            <h1>Movie Search</h1>
+            <br>
+            <div id="search">
+                <input type="text" id="movieSearch">
+                <button type="button" id="btnSearch" class="btn btn-info">Search</button>
+            </div>
+            <br>
+        </div>
+
+        <div id="movieList" hidden>
+            <div id="printMovieSearch">
+
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="http://sabioapi2.azurewebsites.net/scripts/sabio.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/jquery.validate.min.js"></script>
+    <!-- the last script needs to be grabbed and added in order to make the validation work-->
+    <script type="text/javascript">
+
+        sabio.page.currentMovie = null;
+
+        sabio.page.startUp = () => {
+            $("#btnSearch").on("click", sabio.page.handlers.searchMovie)
+            $("#printMovieSearch").on("click", ".tempImage", sabio.page.handlers.getMovie);
+            console.log("Ready")
+        }
+        //HANDLERS
+
+        sabio.page.handlers.searchMovie = () => {
+            let search = $("#movieSearch").val();
+            if (search == "") {
+                alert("Please enter something in the field")
+            }
+            else {
+                sabio.page.getMovies(search)
+            }
+        }
+
+
+        sabio.page.handlers.getMovie = function () {//should not change bc of this
+            sabio.page.currentMovie = $(this).closest(".movie").prop("id");//this is now edit
+            sabio.page.getMoviesById(sabio.page.currentMovie);
+            sabio.page.getMovieTrailer(sabio.page.currentId);
+            $("#modalMovieInfo").modal("show")
+        }
+
+        //CALLBACK FUNCTIONS
+        sabio.page.onGetMovieByIdSuccess = (data, textStatus, XHR) => {//populate modal
+            if (data) {
+                sabio.page.displayModal(data)
+            }
+        }
+
+        sabio.page.onMovieTrailerSuccess = data => {
+            let trailerLink = "https://www.youtube.com/embed/";
+            for (i = 0; i < data.items.length; i++) {
+                $(".modalVideo").attr("src", trailerLink + data.items[i].id.videoId);
+            }
+        }
+
+        sabio.page.onGetMoviesSuccess = (data, textStatus, XHR) => {
+            display = sabio.page.displayMovies(data);
+            $("#movieSearch").val("");
+            console.log(display);
+        }
+
+        sabio.page.onGetMovieByIdSuccess = aMovie => {
+            $(".modalTitle").text("Title: " + aMovie.Title);
+            $(".modalDirector").text("Director: " + aMovie.Director);
+            $(".modalYear").text("Year: " + aMovie.Year);
+            $(".modalGenre").text("Genre: " + aMovie.Genre);
+            $(".modalRating").text("Rotten Tomatoes Rating: " + aMovie.Ratings[1].Value);
+            $(".modalPlot").text("Plot: " + aMovie.Plot);
+        }
+
+        sabio.page.handlers.displayModal = function () {
+            sabio.page.currentMovie = $(this).closest(".movie").prop("id");
+            sabio.page.getMoviesById(sabio.page.currentMovie);
+        }
+
+        sabio.page.onError = (XHR, textStatus, error) => {
+            console.log(error);
+        }
+
+        //AJAX FUNCTIONS
+
+        sabio.page.getMovies = search => {
+            let url = "http://www.omdbapi.com/?s=" + search + "&apikey=dcc20c43";
+
+            const settings = {
+                success: sabio.page.onGetMoviesSuccess,
+                error: sabio.page.onError,
+                type: "GET",
+            };
+            $.ajax(url, settings)
+        }
+
+        sabio.page.getMoviesById = (id) => {
+            let url = "http://www.omdbapi.com/?apikey=7205ce5e&i=" + id;
+            const settings = {
+                success: sabio.page.onGetMovieByIdSuccess,
+                error: sabio.page.onError,
+                type: "GET",
+            };
+            $.ajax(url, settings);
+        }
+
+
+
+        //MISC
+        sabio.page.displayMovies = movies => {
+            for (let i = 0; i < movies.Search.length; i++) {
+                let currentMovie = movies.Search[i];
+                sabio.page.displayMovie(currentMovie);
+            }
+        }
+
+        sabio.page.getMovieTrailer = () => {
+            let title = $(".modalTitle").text();
+            let url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" + title + "+trailer&key=AIzaSyC6UK1iSToH5zXGV8zyHeJXiHees9JB9IA";
+            const settings = {
+                success: sabio.page.onMovieTrailerSuccess,
+                error: sabio.page.onError,
+                type: "GET",
+            };
+            $.ajax(url, settings);
+        }
+
+        sabio.page.displayMovie = (aMovie) => {
+            let template = $($("#movieTemplate").html());
+            template.find(".tempTitle").text(aMovie.Title);
+            template.find(".tempImage").attr("src", aMovie.Poster);
+            template.prop("id", aMovie.imdbID);
+            $("#printMovieSearch").append(template);
+            $("#movieList").show();
+        }
+
+
+    </script>
+    <script type="text/html" id="movieTemplate">
+            <div class="movie">                    
+                <a href="#" class="tempPicLink"><img class="tempImage" src=""></a>
+                <hr>
+                <div class="gray">
+                    <h3 class="tempTitle"></h3>
+                </div>
+            </div>
+    </script>
+
+    <!-- MODAL BELOW -->
+    <div class="modal fade" id="modalMovieInfo">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="movieInfo">
+                        <h1 class="modalTitle"></h1>
+                        <iframe src="" class="modalVideo"></iframe>
+                        <p class="modalDirector"></p>
+                        <p class="modalYear"></p>
+                        <p class="modalGenre"></p>
+                        <p class="modalRating"></p>
+                        <p class="modalPlot"></p>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+</body>
+
+</html>
