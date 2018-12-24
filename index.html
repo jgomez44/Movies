@@ -72,7 +72,7 @@ div {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="http://sabioapi2.azurewebsites.net/scripts/sabio.js"></script>
+    <script src="https://sabioapi2.azurewebsites.net/scripts/sabio.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/jquery.validate.min.js"></script>
     <!-- the last script needs to be grabbed and added in order to make the validation work-->
     <script type="text/javascript">
@@ -145,7 +145,7 @@ div {
         //AJAX FUNCTIONS
 
         sabio.page.getMovies = search => {
-            let url = "http://www.omdbapi.com/?s=" + search + "&apikey=dcc20c43";
+            let url = "https://www.omdbapi.com/?s=" + search + "&apikey=dcc20c43";
 
             const settings = {
                 success: sabio.page.onGetMoviesSuccess,
@@ -156,7 +156,7 @@ div {
         }
 
         sabio.page.getMoviesById = (id) => {
-            let url = "http://www.omdbapi.com/?apikey=7205ce5e&i=" + id;
+            let url = "https://www.omdbapi.com/?apikey=7205ce5e&i=" + id;
             const settings = {
                 success: sabio.page.onGetMovieByIdSuccess,
                 error: sabio.page.onError,
