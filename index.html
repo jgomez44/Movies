@@ -155,7 +155,7 @@ div {
             $.ajax(url, settings)
         }
 
-        sabio.page.getMoviesById = (id) => {
+        sabio.page.getMoviesById = id => {
             let url = "https://www.omdbapi.com/?apikey=7205ce5e&i=" + id;
             const settings = {
                 success: sabio.page.onGetMovieByIdSuccess,
@@ -186,7 +186,7 @@ div {
             $.ajax(url, settings);
         }
 
-        sabio.page.displayMovie = (aMovie) => {
+        sabio.page.displayMovie = aMovie => {
             let template = $($("#movieTemplate").html());
             template.find(".tempTitle").text(aMovie.Title);
             template.find(".tempImage").attr("src", aMovie.Poster);
@@ -225,9 +225,9 @@ div {
                         <p class="modalPlot"></p>
                     </div>
                 </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+            </div>
+        </div>
+    </div>
 
 </body>
 
